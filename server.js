@@ -1,28 +1,15 @@
 const express = require("express");
-const { create } = require("express-handlebars");
+const connectDB = require("./config/db");
 
 const app = express();
-
-const hbs = create({
-  /* config */
-});
-
-//view engine
-app.engine("handlebars", hbs.engine);
-app.set("view engine", "handlebars");
-app.set("views", "./views");
+//connexion a la bd
+connectDB();
+//init middleware
+app.use(express.json());
 
 //routing
-app.get("/", (req, res) => {
-  res.render("home", {
-    title: "cc moi c'est idir",
-    paragraphe:
-      "cc alors je suis idir belfares j'ai 22 ans et je suis un fdp ok ? mrc by",
-  });
-});
+app.use("/admin", require("./routes/admin"));
 
-app.post("/inscription", (req, res) => {
-  res.render("home", { title: "cc moi c'est idir" });
-});
+const PORT = process.env.PORT || 3000;
 
-app.listen(3000, console.log("cc je suis aalll"));
+app.listen(3000, console.log(`App is live on port ${PORT}`));
