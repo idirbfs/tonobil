@@ -5,10 +5,10 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 const { check, validationResult } = require("express-validator");
 
-const Client = require("../models/Client");
+const Gerant = require("../models/Gerant");
 
-// @route    POST client/register
-// @desc     Register CLIENT & get token
+// @route    POST gerant/signup
+// @desc     Register gerant & get token
 // @access   Public
 router.post(
   "/signup",
@@ -21,56 +21,42 @@ router.post(
   ).isLength({
     min: 8,
   }),
-  check("dateNaissance", "Entrez votre date de naissance").isDate(),
   check("tel", "Entrez un numéro de telephone valide").isMobilePhone(),
-  check("numPermis", "Entrez votre numero de permis").isNumeric(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      //res.render("register client") // pass errors array
+      //res.render("register gerant") // pass errors array
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { nom, prenom, email, password, dateNaissance, tel, numPermis } =
-      req.body;
+    const { nom, prenom, email, password, tel } = req.body;
 
     try {
-      let client = await Client.findOne({ email });
+      let gerant = await Gerant.findOne({ email });
 
-      if (client) {
+      if (gerant) {
         return res
           .status(400)
           .json({ errors: [{ msg: "User already exists" }] });
-        //res.render("register client") // pass errors array
+        //res.render("register gerant") // pass errors array
       }
 
-      client = await Client.findOne({ numPermis });
-
-      if (client) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: "Num permis est déjà utilisé" }] });
-        //res.render("register client") // pass errors array
-      }
-
-      client = new Client({
+      gerant = new Gerant({
         nom,
         prenom,
         email,
         password,
-        dateNaissance,
-        numPermis,
         tel,
       });
 
       const salt = await bcrypt.genSalt(10);
-      client.password = await bcrypt.hash(password, salt);
+      gerant.password = await bcrypt.hash(password, salt);
 
-      await client.save();
+      await gerant.save();
 
       const payload = {
         user: {
-          id: client.id,
+          id: gerant.id,
         },
       };
 
@@ -90,6 +76,9 @@ router.post(
   }
 );
 
+// @route    POST gerant/signin
+// @desc     Register gerant & get token
+// @access   Public
 router.post(
   "/signin",
   check("email", "Invalid email").isEmail(),
@@ -102,14 +91,14 @@ router.post(
 
     const { email, password } = req.body;
     try {
-      let client = await Client.findOne({ email });
-      if (!client) {
+      let gerant = await Gerant.findOne({ email });
+      if (!gerant) {
         return res.render("home", {
           errors: [{ msg: "Invalid Credentials (email)" }],
         });
       }
 
-      const isMatch = await bcrypt.compare(password, client.password);
+      const isMatch = await bcrypt.compare(password, gerant.password);
 
       if (!isMatch) {
         return res.render("home", {
@@ -119,7 +108,7 @@ router.post(
 
       const payload = {
         user: {
-          id: client.id,
+          id: gerant.id,
         },
       };
 
