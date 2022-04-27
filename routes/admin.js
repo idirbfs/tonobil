@@ -6,36 +6,53 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 
 const Admin = require("../models/Admin");
+const isAdmin = require("../middleware/isAdmin");
 
 // @route    GET admin/dashboard
 // @desc     dashboard
 // @access   Admin ONLY
-router.get("/dashboard", (req, res) => {
-  const session = req.session;
-  console.log(session.userid);
-  if (session.userid) {
-    res.render("adminDashboard");
+router.get("/dashboard", isAdmin, async (req, res) => {
+  let admin = await Admin.findById(req.session.userid);
+  console.log(admin);
+  res.render("admin/dashboard", {
+    nom: admin.nom,
+    prenom: admin.prenom,
+    email: admin.email,
+  });
+});
+
+// @route    GET admin/dashboard
+// @desc     dashboard
+// @access   Admin ONLY
+router.get("/login", async (req, res) => {
+  if (req.session.isAdmin) {
+    res.redirect("/admin/dashboard");
   }
+
+  res.render("admin/login");
 });
 
 // @route    POST admin/
-// @desc     Authenticate ADMIN & get token
+// @desc     Authenticate ADMIN
 // @access   Public
 router.post(
   "/",
   check("email", "Invalid email").isEmail(),
   check("password", "Invalid Password").trim().isLength({ min: 1 }),
   async (req, res) => {
+    if (req.session.isAdmin) {
+      return res.redirect("/admin/dashboard");
+    }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.render("home", { errors: errors.array() });
+      return res.render("admin/login", { errors: errors.array() });
     }
 
     const { email, password } = req.body;
     try {
       let admin = await Admin.findOne({ email });
       if (!admin) {
-        return res.render("home", {
+        return res.render("admin/login", {
           errors: [{ msg: "Invalid Credentials (email)" }],
         });
       }
@@ -43,33 +60,29 @@ router.post(
       const isMatch = await bcrypt.compare(password, admin.password);
 
       if (!isMatch) {
-        return res.render("home", {
+        return res.render("admin/login", {
           errors: [{ msg: "Invalid Credentials (password)" }],
         });
       }
 
-      var payload = {
-        user: {
-          id: admin.id,
-        },
-      };
-      jwt.sign(
-        payload,
-        config.get("jwtSecret"),
-        { expiresIn: 3600 },
-        (err, token) => {
-          if (err) throw err;
-          console.log(token);
-          req.cookies = ("token", token);
-        }
-      );
+      req.session.userid = admin.id;
+      req.session.isAdmin = true;
 
-      res.send("ça marche");
+      res.redirect("/admin/dashboard");
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
     }
   }
 );
+
+// @route    POST admin/logout
+// @desc     logout ADMIN
+// @access   admin only
+
+router.post("/logout", isAdmin, (req, res) => {
+  req.session.destroy();
+  res.redirect("/admin/login");
+});
 
 module.exports = router;

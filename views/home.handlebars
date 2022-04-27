@@ -1,11 +1,6 @@
-<h1>Connexion admin</h1>
-<form action="/admin" method="post">
-  <input type="text" name="email" />
-  <input type="password" name="password" />
-  <input type="submit" value="se connecter" />
-  <ul>
-    {{#each errors}}
-      <li>{{this.msg}}</li>
-    {{/each}}
-  </ul>
-</form>
+<h1>page d'accueil</h1>
+<div><a href="admin/login">Connexion Admin</a></div>
+<div><a href="/client/login">Login Client</a></div>
+<div><a href="/client/register">Register Client</a></div>
+<div><a href="/gerant/login">Login Gerant</a></div>
+<div><a href="/gerant/register">Register Gerant</a></div>

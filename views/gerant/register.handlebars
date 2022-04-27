@@ -1,0 +1,36 @@
+<h1>Inscription Gerant</h1>
+<form action="/gerant/register" method="post">
+  <div>
+    <label for="">Nom:
+      <input id="" type="text" name="nom" />
+    </label>
+  </div>
+  <div>
+    <label for="">Prenom:
+      <input id="" type="text" name="prenom" />
+    </label>
+  </div>
+  <div>
+    <label for="">Email:
+      <input id="" type="text" name="email" />
+    </label>
+  </div>
+  <div>
+    <label for="">Password:
+      <input type="" name="password" />
+    </label>
+  </div>
+
+  <div>
+    <label for="">Telephone:
+      <input type="text" name="tel" />
+    </label>
+  </div>
+
+  <input type="submit" value="se connecter" />
+  <ul>
+    {{#each errors}}
+      <li>{{this.msg}}</li>
+    {{/each}}
+  </ul>
+</form>

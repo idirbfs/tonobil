@@ -1,0 +1,11 @@
+<h1>Connexion gerant</h1>
+<form action="/gerant/login" method="post">
+  <input type="text" name="email" />
+  <input type="password" name="password" />
+  <input type="submit" value="se connecter" />
+  <ul>
+    {{#each errors}}
+      <li>{{this.msg}}</li>
+    {{/each}}
+  </ul>
+</form>

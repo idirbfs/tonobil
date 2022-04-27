@@ -6,12 +6,32 @@ const config = require("config");
 const { check, validationResult } = require("express-validator");
 
 const Gerant = require("../models/Gerant");
+const isGerant = require("../middleware/isGerant");
 
-// @route    POST gerant/signup
+// @route    GET gerant/dashboard
+// @desc     load dashboard
+// @access   gerant
+router.get("/dashboard", isGerant, async (req, res) => {
+  let gerant = await Gerant.findById(req.session.userid);
+  res.render("gerant/dashboard", {
+    nom: gerant.nom,
+    prenom: gerant.prenom,
+    email: gerant.email,
+  });
+});
+
+// @route    GET gerant/register
+// @desc     load register page
+// @access   Public
+router.get("/register", (req, res) => {
+  res.render("gerant/register");
+});
+
+// @route    POST gerant/register
 // @desc     Register gerant & get token
 // @access   Public
 router.post(
-  "/signup",
+  "/register",
   check("nom", "Le nom est obligatoire").isAlpha(),
   check("prenom", "Le prenom est obligatoire").isAlpha(),
   check("email", "Entrer un email valide").isEmail(),
@@ -54,21 +74,9 @@ router.post(
 
       await gerant.save();
 
-      const payload = {
-        user: {
-          id: gerant.id,
-        },
-      };
-
-      jwt.sign(
-        payload,
-        config.get("jwtSecret"),
-        { expiresIn: "5 days" },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token });
-        }
-      );
+      req.session.userid = gerant.id;
+      req.session.isGerant = true;
+      res.redirect("/gerant/dashboard");
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
@@ -76,24 +84,31 @@ router.post(
   }
 );
 
-// @route    POST gerant/signin
-// @desc     Register gerant & get token
+// @route    GET gerant/login
+// @desc     login gerant
+// @access   Public
+router.get("/login", (req, res) => {
+  res.render("gerant/login");
+});
+
+// @route    POST gerant/login
+// @desc     login gerant
 // @access   Public
 router.post(
-  "/signin",
+  "/login",
   check("email", "Invalid email").isEmail(),
   check("password", "Invalid Password").trim().isLength({ min: 1 }),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.render("home", { errors: errors.array() });
+      return res.render("gerant/login", { errors: errors.array() });
     }
 
     const { email, password } = req.body;
     try {
       let gerant = await Gerant.findOne({ email });
       if (!gerant) {
-        return res.render("home", {
+        return res.render("gerant/login", {
           errors: [{ msg: "Invalid Credentials (email)" }],
         });
       }
@@ -101,32 +116,28 @@ router.post(
       const isMatch = await bcrypt.compare(password, gerant.password);
 
       if (!isMatch) {
-        return res.render("home", {
+        return res.render("gerant/login", {
           errors: [{ msg: "Invalid Credentials (password)" }],
         });
       }
 
-      const payload = {
-        user: {
-          id: gerant.id,
-        },
-      };
-
-      jwt.sign(
-        payload,
-        config.get("jwtSecret"),
-        { expiresIn: "3 minutes" },
-        (err, token) => {
-          if (err) throw err;
-          res.cookie = ("auth", token);
-          return res.json({ token });
-        }
-      );
+      req.session.userid = gerant.id;
+      req.session.isGerant = true;
+      res.redirect("/gerant/dashboard");
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
     }
   }
 );
+
+// @route    POST gerant/logout
+// @desc     logout ADMIN
+// @access   admin only
+
+router.post("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/gerant/login");
+});
 
 module.exports = router;
