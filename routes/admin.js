@@ -59,7 +59,8 @@ router.post(
         { expiresIn: 3600 },
         (err, token) => {
           if (err) throw err;
-          req.headers["set-cookie"]("token", token);
+          console.log(token);
+          req.cookies = ("token", token);
         }
       );
 
