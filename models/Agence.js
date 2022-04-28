@@ -13,6 +13,10 @@ const AgenceSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "vehicule",
+      // numChassis: { type: String },
+      // matricule: String,
+      // kilometrage: String,
+      // fichesMaintenance: [{}]
     },
   ],
   adresses: [

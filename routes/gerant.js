@@ -7,6 +7,7 @@ const { check, validationResult } = require("express-validator");
 
 const Gerant = require("../models/Gerant");
 const isGerant = require("../middleware/isGerant");
+const isAdmin = require("../middleware/isAdmin");
 
 // @route    GET gerant/dashboard
 // @desc     load dashboard
@@ -49,7 +50,10 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { nom, prenom, email, password, tel } = req.body;
+    let { nom, prenom, email, password, tel } = req.body;
+    nom = nom.toLowerCase();
+    prenom = prenom.toLowerCase();
+    email = email.toLowerCase();
 
     try {
       let gerant = await Gerant.findOne({ email });
@@ -104,7 +108,8 @@ router.post(
       return res.render("gerant/login", { errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    email = email.toLowerCase();
     try {
       let gerant = await Gerant.findOne({ email });
       if (!gerant) {
@@ -133,9 +138,9 @@ router.post(
 
 // @route    POST gerant/logout
 // @desc     logout ADMIN
-// @access   admin only
+// @access   gerant only
 
-router.post("/logout", (req, res) => {
+router.post("/logout", isAdmin, (req, res) => {
   req.session.destroy();
   res.redirect("/gerant/login");
 });

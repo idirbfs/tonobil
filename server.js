@@ -34,16 +34,6 @@ app.set("views", "./views");
 //init middleware
 app.use(express.urlencoded({ extended: false }));
 
-//session handling
-app.use(
-  session({
-    secret: config.get("sessionSecret"),
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-  })
-);
-
 //routing
 app.get("/", (req, res) => {
   res.render("home");

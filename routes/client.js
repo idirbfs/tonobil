@@ -32,14 +32,15 @@ router.get("/login", (req, res) => {
 router.post(
   "/login",
   check("email", "Invalid email").isEmail(),
-  check("password", "Invalid Password").trim().isLength({ min: 1 }),
+  check("password", "Invalid Password").trim().isLength({ min: 8 }),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.render("home", { errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    email = email.toLowerCase();
     try {
       let client = await Client.findOne({ email });
       if (!client) {
@@ -98,8 +99,12 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { nom, prenom, email, password, dateNaissance, tel, numPermis } =
+    let { nom, prenom, email, password, dateNaissance, tel, numPermis } =
       req.body;
+
+    nom = nom.toLowerCase();
+    prenom = prenom.toLowerCase();
+    email = email.toLowerCase();
 
     try {
       let client = await Client.findOne({ email });

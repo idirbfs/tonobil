@@ -13,7 +13,6 @@ const isAdmin = require("../middleware/isAdmin");
 // @access   Admin ONLY
 router.get("/dashboard", isAdmin, async (req, res) => {
   let admin = await Admin.findById(req.session.userid);
-  console.log(admin);
   res.render("admin/dashboard", {
     nom: admin.nom,
     prenom: admin.prenom,
@@ -48,7 +47,8 @@ router.post(
       return res.render("admin/login", { errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    email = email.toLowerCase();
     try {
       let admin = await Admin.findOne({ email });
       if (!admin) {
