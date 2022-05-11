@@ -1,47 +1,60 @@
-<h1>Inscription Client</h1>
-<form action="/client/register" method="post">
-  <div>
-    <label for="">Nom:
-      <input id="" type="text" name="nom" />
-    </label>
-  </div>
-  <div>
-    <label for="">Prenom:
-      <input id="" type="text" name="prenom" />
-    </label>
-  </div>
-  <div>
-    <label for="">Email:
-      <input id="" type="text" name="email" />
-    </label>
-  </div>
-  <div>
-    <label for="">Password:
-      <input type="" name="password" />
-    </label>
-  </div>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tonobil | Inscription</title>
+    <link rel="stylesheet" href="/styleInscription.css" />
+  </head>
+  <body>
+    <div class="center">
+      <h1>S'inscrire</h1>
+      <form method="POST" action="/client/register">
+        <div class="pre">
+          <div class="txt_field">
+            <input type="text" name="nom" required />
+            <span></span>
+            <label>Nom </label>
+          </div>
+          <div class="txt_field">
+            <input type="text" name="prenom" required />
+            <span></span>
+            <label>Prénom</label>
+          </div>
+          <div class="txt_field">
+            <input type="text" name="email" required />
+            <span></span>
+            <label>Email </label>
+          </div>
+          <div class="txt_field">
+            <input type="password" name="password" required />
+            <span></span>
+            <label>Mot de Passe </label>
+          </div>
+        </div>
+        <div class="txt_field">
+          <input type="date" name="dateNaissance" required />
+          <span></span>
+          <label>Date de Naissance </label>
+        </div>
+        <div class="pre">
+          <div class="txt_field">
+            <input type="text" name="tel" required />
+            <span></span>
+            <label>Telephone </label>
+          </div>
+          <div class="txt_field">
+            <input type="text" name="numPermis" required />
+            <span></span>
+            <label>Numero Permis </label>
+          </div>
 
-  <div>
-    <label for="">Date de naissance:
-      <input type="date" name="dateNaissance" />
-    </label>
-  </div>
+        </div>
+        <div class="signup_link">
+          Vous etes deja membere?
+          <a href="#">Se Connecter</a>
+        </div>
 
-  <div>
-    <label for="">Telephone:
-      <input type="text" name="tel" />
-    </label>
-  </div>
-  <div>
-    <label for="">Numero du permis:
-      <input type="text" name="numPermis" />
-    </label>
-  </div>
-
-  <input type="submit" value="se connecter" />
-  <ul>
-    {{#each errors}}
-      <li>{{this.msg}}</li>
-    {{/each}}
-  </ul>
-</form>
+        <button class="submit" name="submit">S'Inscrire</button>
+      </form>
+    </div>
+  </body>
+</html>

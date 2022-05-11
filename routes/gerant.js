@@ -137,10 +137,10 @@ router.post(
 );
 
 // @route    POST gerant/logout
-// @desc     logout ADMIN
+// @desc     logout Gerant
 // @access   gerant only
 
-router.post("/logout", isAdmin, (req, res) => {
+router.post("/logout", isGerant, (req, res) => {
   req.session.destroy();
   res.redirect("/gerant/login");
 });

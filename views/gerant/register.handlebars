@@ -1,36 +1,66 @@
-<h1>Inscription Gerant</h1>
-<form action="/gerant/register" method="post">
-  <div>
-    <label for="">Nom:
-      <input id="" type="text" name="nom" />
-    </label>
-  </div>
-  <div>
-    <label for="">Prenom:
-      <input id="" type="text" name="prenom" />
-    </label>
-  </div>
-  <div>
-    <label for="">Email:
-      <input id="" type="text" name="email" />
-    </label>
-  </div>
-  <div>
-    <label for="">Password:
-      <input type="" name="password" />
-    </label>
-  </div>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tonobil | Inscription</title>
+    <link rel="stylesheet" href="/styleInscription.css" />
+  </head>
+  <body>
+    <div class="center">
+      <h1>S'inscrire</h1>
+      <form method="POST" action="/gerant/register">
+        <div class="pre">
+          <div class="txt_field">
+            <input type="text" name="nom" required />
+            <span></span>
+            <label>Nom </label>
+          </div>
+          <div class="txt_field">
+            <input type="text" name="prenom" required />
+            <span></span>
+            <label>Prénom</label>
+          </div>
+          <div class="txt_field">
+            <input type="text" name="email" required />
+            <span></span>
+            <label>Email </label>
+          </div>
+          <div class="txt_field">
+            <input type="password" name="password" required />
+            <span></span>
+            <label>Mot de Passe </label>
+          </div>
+        </div>
 
-  <div>
-    <label for="">Telephone:
-      <input type="text" name="tel" />
-    </label>
-  </div>
+        <div class="pre">
+          <div class="txt_field">
+            <input type="text" name="tel" required />
+            <span></span>
+            <label>Telephone </label>
+          </div>
 
-  <input type="submit" value="se connecter" />
-  <ul>
-    {{#each errors}}
-      <li>{{this.msg}}</li>
-    {{/each}}
-  </ul>
-</form>
+        </div>
+        <div class="signup_link">
+          Vous etes deja membre?
+          <a href="/gerant/login">Se Connecter</a>
+        </div>
+
+        <button class="submit" name="submit">S'Inscrire</button>
+      </form>
+    </div>
+    {{#if errors}}
+      <ul
+        id="errors"
+        style="max-width: 300PX; margin: auto; z-index: 1;position: fixed;left: 800px;right: 0;bottom: 200px;height: 100px;background-color: #000;color: white;padding: 0 20px;"
+      >
+        <button onclick="closePopup()">X</button>
+        {{#each errors}}
+          <li color="white">{{this.msg}}</li>
+        {{/each}}
+      </ul>
+    {{/if}}
+    <script>
+      function closePopup() {
+      document.getElementById("errors").setAttribute("hidden", "true") }
+    </script>
+  </body>
+</html>

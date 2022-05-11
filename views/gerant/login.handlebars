@@ -1,11 +1,44 @@
-<h1>Connexion gerant</h1>
-<form action="/gerant/login" method="post">
-  <input type="text" name="email" />
-  <input type="password" name="password" />
-  <input type="submit" value="se connecter" />
-  <ul>
-    {{#each errors}}
-      <li>{{this.msg}}</li>
-    {{/each}}
-  </ul>
-</form>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tonobil | Connexion</title>
+    <link rel="stylesheet" href="/styleConnexion.css" />
+  </head>
+  <body>
+    <div class="center">
+      <h1>Se Connecter/Gerant</h1>
+      <form method="POST" action="/gerant/login">
+        <div class="txt_field">
+          <input type="text" name="email" required />
+          <span></span>
+          <label>Email</label>
+        </div>
+        <div class="txt_field">
+          <input type="password" name="password" required />
+          <span></span>
+          <label>Mot de passe</label>
+        </div>
+        <button class="submit" name="submit">Se Connecter</button>
+        <div class="signup_link">
+          Vous etes pas membre?
+          <a href="/gerant/register">S'inscrire</a>
+        </div>
+      </form>
+    </div>
+    {{#if errors}}
+      <ul
+        id="errors"
+        style="max-width: 300PX; margin: auto; z-index: 1;position: fixed;left: 800px;right: 0;bottom: 200px;height: 100px;background-color: #000;color: white;padding: 0 20px;"
+      >
+        <button onclick="closePopup()">X</button>
+        {{#each errors}}
+          <li color="white">{{this.msg}}</li>
+        {{/each}}
+      </ul>
+    {{/if}}
+    <script>
+      function closePopup() {
+      document.getElementById("errors").setAttribute("hidden", "true") }
+    </script>
+  </body>
+</html>

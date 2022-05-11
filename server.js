@@ -12,6 +12,9 @@ const hbs = create({});
 //connexion a la bd
 connectDB();
 
+//static public folder
+app.use(express.static("public"));
+
 //session handling
 const store = new mongoDBSession({
   uri: config.get("mongoURI"),
@@ -38,7 +41,6 @@ app.use(express.urlencoded({ extended: false }));
 app.get("/", (req, res) => {
   res.render("home");
 });
-
 app.use("/admin", require("./routes/admin"));
 app.use("/client", require("./routes/client"));
 app.use("/gerant", require("./routes/gerant"));
