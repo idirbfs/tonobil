@@ -50,14 +50,16 @@
     {{#if errors}}
       <ul
         id="errors"
-        style="max-width: 300PX; margin: auto; z-index: 1;position: fixed;left: 800px;right: 0;bottom: 200px;height: 100px;background-color: #000;color: white;padding: 0 20px;"
+        style="max-width: 300PX; margin: auto; z-index: 1;position: fixed;left: 800px;right: 0;bottom: 200px;height: 200px;background-color: #000;color: white;padding: 0 20px;"
       >
         <button onclick="closePopup()">X</button>
         {{#each errors}}
           <li color="white">{{this.msg}}</li>
         {{/each}}
+
       </ul>
     {{/if}}
+
     <script>
       function closePopup() {
       document.getElementById("errors").setAttribute("hidden", "true") }

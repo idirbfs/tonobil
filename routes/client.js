@@ -36,7 +36,7 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.render("home", { errors: errors.array() });
+      return res.render("client/login", { errors: errors.array() });
     }
 
     let { email, password } = req.body;
@@ -44,7 +44,7 @@ router.post(
     try {
       let client = await Client.findOne({ email });
       if (!client) {
-        return res.render("home", {
+        return res.render("client/login", {
           errors: [{ msg: "Invalid Credentials (email)" }],
         });
       }
@@ -52,7 +52,7 @@ router.post(
       const isMatch = await bcrypt.compare(password, client.password);
 
       if (!isMatch) {
-        return res.render("home", {
+        return res.render("client/login", {
           errors: [{ msg: "Invalid Credentials (password)" }],
         });
       }
@@ -96,7 +96,7 @@ router.post(
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       //res.render("register client") // pass errors array
-      return res.status(400).json({ errors: errors.array() });
+      return res.render("client/register", { errors: errors.array() });
     }
 
     let { nom, prenom, email, password, dateNaissance, tel, numPermis } =
@@ -110,18 +110,18 @@ router.post(
       let client = await Client.findOne({ email });
 
       if (client) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: "User already exists" }] });
+        return res.render("client/register", {
+          errors: [{ msg: "User already exists" }],
+        });
         //res.render("register client") // pass errors array
       }
 
       client = await Client.findOne({ numPermis });
 
       if (client) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: "Num permis est déjà utilisé" }] });
+        return res.render("client/register", {
+          errors: [{ msg: "Num permis est déjà utilisé" }],
+        });
         //res.render("register client") // pass errors array
       }
 
