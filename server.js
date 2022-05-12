@@ -43,15 +43,6 @@ app.get("/", (req, res) => {
   res.render("home");
 });
 
-app.get("/hhh", (req, res) => {
-  const admin = new Admin({
-    nom: "ghgvh",
-    prenom: "jhgjh",
-    email: "idir@admin.clo",
-    password: "jhgjhg",
-  });
-  admin.save();
-});
 app.use("/admin", require("./routes/admin"));
 app.use("/client", require("./routes/client"));
 app.use("/gerant", require("./routes/gerant"));
