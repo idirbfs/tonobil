@@ -37,7 +37,7 @@ router.get("/login", async (req, res) => {
 router.post(
   "/",
   check("email", "Invalid email").isEmail(),
-  check("password", "Invalid Password").trim().isLength({ min: 1 }),
+  check("password", "Invalid Password").trim().isLength({ min: 8 }),
   async (req, res) => {
     if (req.session.isAdmin) {
       return res.redirect("/admin/dashboard");

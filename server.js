@@ -4,6 +4,7 @@ const { create } = require("express-handlebars");
 const config = require("config");
 const session = require("express-session");
 const mongoDBSession = require("connect-mongodb-session")(session);
+const Admin = require("./models/Admin");
 
 const app = express();
 
@@ -40,6 +41,16 @@ app.use(express.urlencoded({ extended: false }));
 //routing
 app.get("/", (req, res) => {
   res.render("home");
+});
+
+app.get("/hhh", (req, res) => {
+  const admin = new Admin({
+    nom: "ghgvh",
+    prenom: "jhgjh",
+    email: "idir@admin.clo",
+    password: "jhgjhg",
+  });
+  admin.save();
 });
 app.use("/admin", require("./routes/admin"));
 app.use("/client", require("./routes/client"));

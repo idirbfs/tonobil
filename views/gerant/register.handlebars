@@ -6,7 +6,7 @@
   </head>
   <body>
     <div class="center">
-      <h1>S'inscrire</h1>
+      <h1>S'inscrire/Gerant</h1>
       <form method="POST" action="/gerant/register">
         <div class="pre">
           <div class="txt_field">
@@ -56,10 +56,8 @@
         {{#each errors}}
           <li color="white">{{this.msg}}</li>
         {{/each}}
-
       </ul>
     {{/if}}
-
     <script>
       function closePopup() {
       document.getElementById("errors").setAttribute("hidden", "true") }
