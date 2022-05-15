@@ -4,7 +4,8 @@ const { create } = require("express-handlebars");
 const config = require("config");
 const session = require("express-session");
 const mongoDBSession = require("connect-mongodb-session")(session);
-const Admin = require("./models/Admin");
+var multer = require("multer");
+var upload = multer();
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.set("views", "./views");
 
 //init middleware
 app.use(express.urlencoded({ extended: false }));
+app.use(upload.array());
 
 //routing
 app.get("/", (req, res) => {
@@ -46,6 +48,8 @@ app.get("/", (req, res) => {
 app.use("/admin", require("./routes/admin"));
 app.use("/client", require("./routes/client"));
 app.use("/gerant", require("./routes/gerant"));
+app.use("/agence", require("./routes/agence"));
+app.use("/vehicule", require("./routes/vehicule"));
 
 const PORT = process.env.PORT || 3000;
 

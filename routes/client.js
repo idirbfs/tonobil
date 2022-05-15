@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const config = require("config");
-const { check, validationResult } = require("express-validator");
+const { check, validationResult, body } = require("express-validator");
 const Client = require("../models/Client");
 const isClient = require("../middleware/isClient");
 
@@ -168,71 +168,148 @@ router.put(
   check("nom", "Entrer un nom valide").isAlpha(),
   check("prenom", "Entrer un nom valide").isAlpha(),
   check("email", "Entrer un email valide").isEmail(),
-  check(
-    "password",
-    "La taille du mot de passe doit être de minimum 8"
-  ).isLength({
-    min: 8,
-  }),
+
   check("dateNaissance", "Entrez votre date de naissance").isDate(),
   check("tel", "Entrez un numéro de telephone valide").isMobilePhone(),
   check("numPermis", "Entrez votre numero de permis").isNumeric(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      return res.json(errors);
       //res.render("register client") // pass errors array
-      return res.render("client/register", { errors: errors.array() });
+      //return res.render("client/register", { errors: errors.array() });
     }
-
-    let { nom, prenom, email, password, dateNaissance, tel, numPermis } =
-      req.body;
-
-    nom = nom.toLowerCase();
-    prenom = prenom.toLowerCase();
-    email = email.toLowerCase();
-
     try {
+      let { nom, prenom, email, password, dateNaissance, tel, numPermis } =
+        req.body;
+
       let client = await Client.findById(req.session.userid);
 
       if (!client) {
         return res.status(401);
       }
 
-      const verifierPermis = await Client.findOne({ numPermis });
-
-      if (verifierPermis) {
+      const isMatch = bcrypt.compare(password, client.password);
+      if (!isMatch) {
         return res.status(403);
       }
 
-      if (client) {
-        return res.render("client/register", {
-          errors: [{ msg: "Num permis est déjà utilisé" }],
-        });
-        //res.render("register client") // pass errors array
+      nom = nom.toLowerCase();
+      prenom = prenom.toLowerCase();
+      email = email.toLowerCase();
+
+      const verifierEmail = await Client.findOne({ email });
+      if (verifierEmail && verifierEmail.id !== client.id) {
+        return res.status(401).send("Utilisez un email different");
       }
 
-      client = new Client({
-        nom,
-        prenom,
-        email,
-        password,
-        dateNaissance,
-        numPermis,
-        tel,
-      });
+      const verifierPermis = await Client.findOne({ numPermis });
+      if (verifierPermis && verifierPermis.id !== client.id) {
+        return res.status(401).send("entrer votre propore numero de permis");
+      }
 
-      const salt = await bcrypt.genSalt(10);
-      client.password = await bcrypt.hash(password, salt);
+      client.nom = nom;
+      client.prenom = prenom;
+      client.email = email;
+      client.dateNaissance = dateNaissance;
+      client.tel = tel;
+      client.numPermis = numPermis;
 
       await client.save();
 
-      req.session.userid = client.id;
-      req.session.isClient = true;
+      res.json({ client });
 
-      res.redirect("/client/dashboard");
+      //res.redirect("/client/dashboard");
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
+    }
+  }
+);
+
+// @route    PUT client/update/password
+// @desc     update profile client
+// @access   client only
+router.put(
+  "/update/password",
+  isClient,
+  check("newPassword", "Entrer un mot de passe de taille 8 minimum").isLength({
+    min: 8,
+  }),
+  body("newPasswordConfirmation").custom((value, { req }) => {
+    if (value !== req.body.newPassword) {
+      throw new Error(
+        "Le mot de passe et sa confirmation ne correspendent pas"
+      );
+    }
+    return true;
+  }),
+  check("oldPassword", "Entrez votre mot de passe").isLength({
+    min: 8,
+  }),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json(errors);
+      //res.render("register client") // pass errors array
+      //return res.render("client/register", { errors: errors.array() });
+    }
+    try {
+      const { newPassword, oldPassword } = req.body;
+      let client = await Client.findById(req.session.userid);
+      const isMatch = await bcrypt.compare(oldPassword, client.password);
+      console.log(isMatch);
+
+      if (!isMatch) {
+        return res
+          .status(403)
+          .send("Votre mot de passe actuelle est incorrecte");
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const newPasswordHashed = await bcrypt.hash(newPassword, salt);
+
+      client.password = newPasswordHashed;
+      await client.save();
+
+      return res.json(client);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("serverError");
+    }
+  }
+);
+
+// @route    DELETE client/profile/delete
+// @desc     delete profile client
+// @access   client only
+router.delete(
+  "/profile/delete",
+  isClient,
+  check("password", "Entrer votre propre mot de passe").isLength({ min: 8 }),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({ errors: errors.array() });
+    }
+    try {
+      const client = await Client.findById(req.session.userid);
+      const isMatch = await bcrypt.compare(req.body.password, client.password);
+
+      if (!isMatch) {
+        return res
+          .status(401)
+          .json({ errors: [{ msg: "entrez votre propre mot de passe" }] });
+      }
+
+      await Client.findByIdAndDelete(req.session.userid);
+
+      req.session.destroy();
+
+      res.status(200).send("client deleted");
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server error");
     }
   }
 );

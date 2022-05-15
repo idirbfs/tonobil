@@ -23,6 +23,13 @@ const GerantSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  agences: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "agence",
+      default: [],
+    },
+  ],
 });
 
 module.exports = mongoose.model("gerant", GerantSchema);

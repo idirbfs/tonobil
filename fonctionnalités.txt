@@ -1,0 +1,32 @@
+*client:
+login OK
+register OK
+update profile OK
+update password OK
+delete profile OK
+get all vehicules disponibles (with filters)
+reserver vehicule
+get all locations
+
+*admin: 
+login OK
+ajouter vehicule OK presque
+
+*gerant:
+login OK
+register OK
+update profile OK
+update password OK
+delete profile OK
+add agence OK NOT OK *****
+get all agences OK
+get agence with index OK
+delete agence
+ajouter vehicule
+get all vehicules
+get vehicule with index
+get all vehicule/disponible
+get all vehicule/reserve
+get all vehicule/loue
+get all clients
+confirmer reservation

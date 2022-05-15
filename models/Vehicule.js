@@ -10,7 +10,7 @@ const VehiculeSchema = new mongoose.Schema({
     required: true,
   },
   capaciteCoffre: {
-    type: String,
+    type: Number,
   },
   carburant: {
     type: String,
@@ -29,7 +29,7 @@ const VehiculeSchema = new mongoose.Schema({
   photo: {
     type: Buffer,
     contentType: String,
-    required: true,
+    //required: true,
   },
 });
 

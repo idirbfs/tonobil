@@ -2,11 +2,10 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const config = require("config");
-const { check, validationResult } = require("express-validator");
+const { check, validationResult, body } = require("express-validator");
 
 const Gerant = require("../models/Gerant");
 const isGerant = require("../middleware/isGerant");
-const isAdmin = require("../middleware/isAdmin");
 
 // @route    GET gerant/dashboard
 // @desc     load dashboard
@@ -143,5 +142,151 @@ router.post("/logout", isGerant, (req, res) => {
   req.session.destroy();
   res.redirect("/gerant/login");
 });
+
+// @route    PUT gerant/profile/update
+// @desc     update profile gerant
+// @access   gerant only
+router.put(
+  "/profile/update",
+  isGerant,
+  check("nom", "Entrer un nom valide").isAlpha(),
+  check("prenom", "Entrer un nom valide").isAlpha(),
+  check("email", "Entrer un email valide").isEmail(),
+  check("tel", "Entrez un numéro de telephone valide").isMobilePhone(),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json(errors);
+    }
+    try {
+      let { nom, prenom, email, password, tel } = req.body;
+
+      let gerant = await Gerant.findById(req.session.userid);
+
+      if (!gerant) {
+        throw new Error("Utilisateur introuvable");
+      }
+
+      const isMatch = bcrypt.compare(password, gerant.password);
+      if (!isMatch) {
+        return res
+          .status(403)
+          .json({ errors: [{ msg: "Entrez votre propre mot de passe" }] });
+      }
+
+      const verifierEmail = await Gerant.findOne({ email });
+      if (verifierEmail && verifierEmail.id !== gerant.id) {
+        return res.status(401).send("Utilisez un email different");
+      }
+
+      nom = nom.toLowerCase();
+      prenom = prenom.toLowerCase();
+      email = email.toLowerCase();
+
+      gerant.nom = nom;
+      gerant.prenom = prenom;
+      gerant.email = email;
+      gerant.tel = tel;
+
+      await gerant.save();
+
+      res.json({ gerant });
+
+      //res.redirect("/gerant/dashboard");
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+    }
+  }
+);
+
+// @route    PUT gerant/profile/update/password
+// @desc     update password gerant
+// @access   gerant only
+router.put(
+  "/profile/update/password",
+  isGerant,
+  check("newPassword", "Entrer un mot de passe de taille 8 minimum").isLength({
+    min: 8,
+  }),
+  body("newPasswordConfirmation").custom((value, { req }) => {
+    if (value !== req.body.newPassword) {
+      throw new Error(
+        "Le mot de passe et sa confirmation ne correspendent pas"
+      );
+    }
+    return true;
+  }),
+  check("oldPassword", "Entrez votre mot de passe").isLength({
+    min: 8,
+  }),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json(errors);
+      //res.render("register client") // pass errors array
+      //return res.render("client/register", { errors: errors.array() });
+    }
+    try {
+      const { newPassword, oldPassword } = req.body;
+
+      if (newPassword === oldPassword) {
+        return res
+          .status(401)
+          .send("Essayez avec un mot de passe different que l'ancien");
+      }
+      let gerant = await Gerant.findById(req.session.userid);
+      const isMatch = await bcrypt.compare(oldPassword, gerant.password);
+      console.log(isMatch);
+      if (!isMatch) {
+        return res
+          .status(403)
+          .send("Votre mot de passe actuelle est incorrecte");
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const newPasswordHashed = await bcrypt.hash(newPassword, salt);
+
+      gerant.password = newPasswordHashed;
+      await gerant.save();
+
+      return res.json(gerant);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("serverError");
+    }
+  }
+);
+
+// @route    DELETE gerant/profile/delete
+// @desc     delete profile gerant
+// @access   gerant only
+router.delete(
+  "/profile/delete",
+  isGerant,
+  check("password", "Entrer votre propre mot de passe").isLength({ min: 8 }),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({ errors: errors.array() });
+    }
+    try {
+      const gerant = await Gerant.findById(req.session.userid);
+      const isMatch = await bcrypt.compare(req.body.password, gerant.password);
+
+      if (!isMatch) {
+        return res
+          .status(401)
+          .json({ errors: [{ msg: "entrez votre propre mot de passe" }] });
+      }
+      await Gerant.findByIdAndDelete(req.session.userid);
+      req.session.destroy();
+      res.status(200).send("gerant deleted");
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server error");
+    }
+  }
+);
 
 module.exports = router;

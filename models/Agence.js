@@ -4,10 +4,7 @@ const AgenceSchema = new mongoose.Schema({
   nom: {
     type: String,
     required: true,
-  },
-  gerant: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "gerant",
+    unique: true,
   },
   vehicules: [
     {
@@ -16,13 +13,13 @@ const AgenceSchema = new mongoose.Schema({
       // numChassis: { type: String },
       // matricule: String,
       // kilometrage: String,
-      // fichesMaintenance: [{}]
+      // fichesMaintenance: [{}],
     },
   ],
   adresses: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "adresse",
+      ref: "wilaya",
     },
   ],
 });
