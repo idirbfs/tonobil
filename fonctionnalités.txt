@@ -10,7 +10,7 @@ get all locations
 
 *admin: 
 login OK
-ajouter vehicule OK presque
+ajouter vehicule OK (sans photo)
 
 *gerant:
 login OK

@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const config = require("config");
 const { check, validationResult, body } = require("express-validator");
 const Client = require("../models/Client");
 const isClient = require("../middleware/isClient");
@@ -217,9 +216,9 @@ router.put(
 
       await client.save();
 
-      res.json({ client });
+      //return res.json({ client });
 
-      //res.redirect("/client/dashboard");
+      return res.redirect("/client/dashboard", { client });
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");

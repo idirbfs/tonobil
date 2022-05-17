@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const { check, validationResult } = require("express-validator");
-const config = require("config");
 
 const Admin = require("../models/Admin");
 const isAdmin = require("../middleware/isAdmin");
@@ -22,7 +21,7 @@ router.get("/dashboard", isAdmin, async (req, res) => {
 // @route    GET admin/dashboard
 // @desc     dashboard
 // @access   Admin ONLY
-router.get("/login", async (req, res) => {
+router.get("/login", (req, res) => {
   if (req.session.isAdmin) {
     res.redirect("/admin/dashboard");
   }

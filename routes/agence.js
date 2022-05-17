@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const config = require("config");
 const { check, validationResult, body } = require("express-validator");
 const isGerant = require("../middleware/isGerant");
 const Gerant = require("../models/Gerant");
@@ -27,23 +25,34 @@ router.get("/all", isGerant, async (req, res) => {
 // @desc     add new agence
 // @access   gerant only
 
-router.post("/add", isGerant, async (req, res) => {
-  try {
-    let gerant = await Gerant.findById(req.session.userid);
-    if (!gerant) {
-      return res.status(500).send("server error");
+router.post(
+  "/add",
+  isGerant,
+  check("nom", "Entrez un nom valide").trim().not().isEmpty(),
+  check("numAgrement", "Entrez un num d'agrement valide").trim().isNumeric(),
+  check("adresse", "Erreur dans le champs adresse").trim().isMongoId(),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({ errors: errors.array() });
     }
-
-    let agence = new Agence({ nom: "Nabil Location" });
-    await agence.save();
-    gerant.agences.push(agence.id);
-    await gerant.save();
-    return res.json(agence);
-  } catch (err) {
-    console.error(err.msg);
-    return res.status(500).send("Server error");
+    try {
+      const { nom, numAgrement, adresse } = req.body;
+      let gerant = await Gerant.findById(req.session.userid);
+      if (!gerant) {
+        return res.status(500).send("server error");
+      }
+      let agence = new Agence({ nom, numAgrement, adresse });
+      await agence.save();
+      gerant.agences.push(agence.id);
+      await gerant.save();
+      return res.json(agence);
+    } catch (err) {
+      console.error(err.msg);
+      return res.status(500).send("Server error");
+    }
   }
-});
+);
 
 // @route    GET /agence/:index
 // @desc     get agence dashboard by index
