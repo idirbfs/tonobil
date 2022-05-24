@@ -4,10 +4,11 @@ const { create } = require("express-handlebars");
 const config = require("config");
 const session = require("express-session");
 const mongoDBSession = require("connect-mongodb-session")(session);
-var multer = require("multer");
-var upload = multer();
+const multer = require("multer");
+const upload = multer();
 
 const app = express();
+console.log(app);
 
 const hbs = create({});
 

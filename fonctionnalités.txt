@@ -4,13 +4,17 @@ register OK
 update profile OK
 update password OK
 delete profile OK
-get all vehicules disponibles (with filters)
+[get all vehicules disponibles (with filters)
 reserver vehicule
-get all locations
+get all locations]
 
 *admin: 
 login OK
 ajouter vehicule OK (sans photo)
+delete client OK
+get all clients OK
+delete agence 
+delete gerant d'agence
 
 *gerant:
 login OK

@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const { check, validationResult } = require("express-validator");
 
 const Admin = require("../models/Admin");
+const Client = require("../models/Client");
 const isAdmin = require("../middleware/isAdmin");
 
 // @route    GET admin/dashboard
@@ -18,9 +19,9 @@ router.get("/dashboard", isAdmin, async (req, res) => {
   });
 });
 
-// @route    GET admin/dashboard
+// @route    GET admin/login
 // @desc     dashboard
-// @access   Admin ONLY
+// @access
 router.get("/login", (req, res) => {
   if (req.session.isAdmin) {
     res.redirect("/admin/dashboard");
@@ -82,5 +83,84 @@ router.post("/logout", isAdmin, (req, res) => {
   req.session.destroy();
   res.redirect("/admin/login");
 });
+
+// @route    DELETE admin/client/:id
+// @desc     delete client by ADMIN
+// @access   admin only
+router.delete(
+  "/client/:id",
+  isAdmin,
+  check("password", "Entrer votre propre mot de passe").isLength({ min: 8 }),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({ errors: errors.array() });
+    }
+    try {
+      //return res.send(req.params["id"]);
+      const admin = await Admin.findById(req.session.userid);
+      const isMatch = await bcrypt.compare(req.body.password, admin.password);
+      if (!isMatch) {
+        return res
+          .status(401)
+          .json({ errors: [{ msg: "entrez votre propre mot de passe" }] });
+      }
+
+      const client = await Client.findById(req.params["id"]);
+      if (!client) {
+        return res.status(404).send("Client not found");
+      }
+      await Client.findByIdAndDelete(client.id);
+
+      return res.status(200).send("client deleted");
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server error");
+    }
+  }
+);
+
+// @route    GET admin/client/all
+// @desc     get all clients
+// @access   admin only
+router.get("/client/all", isAdmin, async (req, res) => {
+  const clients = await Client.find();
+  return res.send(clients);
+});
+
+// @route    DELETE admin/client/:id
+// @desc     delete agence by ADMIN
+// @access   admin only
+router.delete(
+  "/agence/:id",
+  isAdmin,
+  check("password", "Entrer votre propre mot de passe").isLength({ min: 8 }),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({ errors: errors.array() });
+    }
+    try {
+      const admin = await Admin.findById(req.session.userid);
+      const isMatch = await bcrypt.compare(req.body.password, admin.password);
+      if (!isMatch) {
+        return res
+          .status(401)
+          .json({ errors: [{ msg: "entrez votre propre mot de passe" }] });
+      }
+
+      const agence = await Agence.findById(req.params["id"]);
+      if (!agence) {
+        return res.status(404).send("Agence not found");
+      }
+      await Agence.findByIdAndDelete(agence.id);
+
+      return res.status(200).send("client deleted");
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server error");
+    }
+  }
+);
 
 module.exports = router;
